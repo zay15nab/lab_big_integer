@@ -11,6 +11,7 @@ public:
     BigInteger();                          // Default (value 0)
     BigInteger(int value);                 // From int
     BigInteger(long long value);           // From long long
+
     explicit BigInteger(const std::string& str);  // From string, e.g. "123456789"
 
     // =================== Copy =====================================
@@ -74,3 +75,4 @@ private:
     std::vector<int> digits_;  // digits (least significant first)
     bool negative_ = false;    // true if the number is negative
 };
+
