@@ -4,16 +4,24 @@ BigInteger::BigInteger() {
     negative_ = false;
 }
 BigInteger::BigInteger(int value) {
+    if (value == 0) {
+        digits_ = {0};
+        negative_ = false;
+        return;
+    }
     if (value < 0) {
         negative_ = true;
-        value = -value;
     } else {
         negative_ = false;
     }
-    do {
-        digits_.push_back(value % 10);
-        value /= 10;
-    } while (value > 0);
+    long long abs_value = value;
+    if (abs_value < 0) {
+        abs_value = -abs_value;
+    }
+    while (abs_value > 0) {
+        digits_.push_back(abs_value % 10);
+        abs_value /= 10;
+    }
 }
 BigInteger::BigInteger(long long value) {
     if (value < 0) {
@@ -32,12 +40,17 @@ BigInteger::BigInteger(const std::string& str) {
     if (str[0] == '-') {
         negative_ = true;
         start = 1;
+    }else{
+        negative_=false;
     }
     for (int i = str.length() - 1; i >= (int)start; --i) {
         digits_.push_back(str[i] - '0');
     }
-    while (digits_.size() > 1 && digits_.back() == '0') {
+    while (digits_.size() > 1 && digits_.back() == 0) {
         digits_.pop_back();
+    }
+    if (digits_.size() == 1 && digits_[0] == 0) {
+        negative_ = false;
     }
 }
 std::string BigInteger::to_string() const {
@@ -172,7 +185,7 @@ void BigInteger::sub_abs(const BigInteger& other) {
     }
 }
 void BigInteger::mul_abs(const BigInteger& other) {
-    std::vector<int> result(digits_.size() + other.digits_.size());
+    std::vector<int> result(digits_.size() + other.digits_.size(),0);
     for (size_t i = 0; i < digits_.size(); ++i) {
         int carry = 0;
         for (size_t j = 0; j < other.digits_.size(); ++j) {
@@ -182,6 +195,10 @@ void BigInteger::mul_abs(const BigInteger& other) {
         }
         if (carry > 0) {
             result[i + other.digits_.size()] += carry;
+            while (result[i + other.digits_.size()] >= 10) {
+                result[i + other.digits_.size()] -= 10;
+                result[i + other.digits_.size() + 1]++;
+    }
         }
     }
     while (result.size() > 1 && result.back() == 0) {
