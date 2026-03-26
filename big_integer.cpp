@@ -1,4 +1,5 @@
 #include <big_integer.h>
+#include <iostream>
 BigInteger::BigInteger() {
     digits_ = {0};
     negative_ = false;
@@ -36,7 +37,7 @@ BigInteger::BigInteger(long long value) {
     } while (value > 0);
 }
 BigInteger::BigInteger(const std::string& str) {
-    size_t start = 0;
+        size_t start = 0;
     if (str[0] == '-') {
         negative_ = true;
         start = 1;
@@ -185,7 +186,7 @@ void BigInteger::sub_abs(const BigInteger& other) {
     }
 }
 void BigInteger::mul_abs(const BigInteger& other) {
-    std::vector<int> result(digits_.size() + other.digits_.size(),0);
+    std::vector<int> result(digits_.size() + other.digits_.size());
     for (size_t i = 0; i < digits_.size(); ++i) {
         int carry = 0;
         for (size_t j = 0; j < other.digits_.size(); ++j) {
@@ -195,10 +196,6 @@ void BigInteger::mul_abs(const BigInteger& other) {
         }
         if (carry > 0) {
             result[i + other.digits_.size()] += carry;
-            while (result[i + other.digits_.size()] >= 10) {
-                result[i + other.digits_.size()] -= 10;
-                result[i + other.digits_.size() + 1]++;
-    }
         }
     }
     while (result.size() > 1 && result.back() == 0) {
@@ -221,10 +218,15 @@ BigInteger BigInteger::div_mod_abs(const BigInteger& divisor) {
             remainder.digits_.pop_back();
         }
         int digit = 0;
-        while (remainder.cmp_abs(divisor) >= 0) {
-            remainder.sub_abs(divisor);
-            ++digit;
-        }
+        for (int d = 9; d >= 0; --d) {
+            BigInteger temp = divisor;
+            temp *= BigInteger(d);
+            if (temp <= remainder) {
+                digit = d;
+                remainder -= temp;
+                break;
+            }
+        }           
         digits_.insert(digits_.begin(), digit);
     }
     while (digits_.size() > 1 && digits_.back() == 0) {
@@ -253,7 +255,7 @@ BigInteger& BigInteger::operator+=(const BigInteger& rhs) {
         temp.negative_ = false;
         temp.sub_abs(*this);
         *this = temp;
-        negative_ = !negative_;
+        negative_ = rhs.negative_;
     }
     return *this;
 }
